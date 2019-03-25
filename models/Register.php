@@ -128,4 +128,12 @@ class Register {
 
         return (empty($user)) ? True : False;
     }
+
+    public function update_password() {
+        $password = password_hash('test123', PASSWORD_DEFAULT);
+        $query = 'UPDATE users SET password = :password WHERE id = 16';
+        $statement = $this->conn->prepare($query);
+        $statement->bindParam(':password', $password);
+        $statement->execute();
+    }
 }

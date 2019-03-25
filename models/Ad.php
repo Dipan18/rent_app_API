@@ -121,7 +121,7 @@ Class Ad {
         $absolute_path = str_replace('\\', '/', realpath($this->folder_path));
 
         foreach ($this->image_names as $image_name) {
-            array_push($values, $pro_id, $image_name, $absolute_path);
+            array_push($values, $pro_id, $image_name, $absolute_path . '/');
         }
 
         $row_places = '(' . implode(', ', array_fill(0, count($column_names), '?')) . ')';
@@ -153,16 +153,19 @@ Class Ad {
 
                 //commit changes in case of no exception
                 $this->conn->commit();
+
+                return ['error' => false, 'message' => 'Ad uploaded Successfully!'];
             } catch (PDOException $exception) {
-                echo $exception->getMessage();
                 //Exception occurred rollback changes
                 $this->conn->rollback(); 
 
                 //Remove images folder from uploads directory
                 $this->rmdir_recursive($this->folder_path);
+
+                return ['error' => true, 'message' => 'Error occurred!'];
             }
         } else { 
-            echo 'error moving files';
+            return ['error' => true, 'message' => 'Failed to upload images to Database'];
         }
     }
     

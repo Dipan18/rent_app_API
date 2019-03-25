@@ -157,7 +157,6 @@ class Products {
                 products.pro_desc LIKE ' . '\'%' . $search_query . '%\'' .
                 'GROUP BY (products.pro_id)';
 
-      // return $query;
       $statement = $this->conn->prepare($query);
       $statement->execute();
 
@@ -194,7 +193,7 @@ class Products {
       $products_by_user = $statement->fetchAll(PDO::FETCH_ASSOC);
 
       if (empty($products_by_user)) {
-        return ['message' => 'No products by this user'];
+        return [];
       } 
     
       foreach ($products_by_user as &$product) {
@@ -205,7 +204,7 @@ class Products {
       return $products_by_user;
   }
 
-  public function fix_img_path($img_array) {
+  public static function fix_img_path($img_array) {
     $images = [];
     $ip = 'http://192.168.31.150:8181';
     

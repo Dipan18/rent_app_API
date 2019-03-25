@@ -3,18 +3,18 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control: application/json');
-header('Access-Control-Allow-Methods: PUT');
+header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 
 include_once '../config/Database.php';
-include_once '../models/register.php';
+include_once '../models/Rent.php';
 
 $database = new Database();
 $db = $database->connect();
 
-$register = new Register($db);
+$rent = new Rent($db);
 
-$result = $register->update_user_details();
-// $result = $register->update_password();
+$result = $rent->merge_requests_with_rented_items();
+
 echo json_encode($result);
