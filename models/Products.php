@@ -22,8 +22,6 @@ class Products {
 
   public function get_products() {
       $per_page = 20;
-      $offset;
-
       $offset = isset($_GET['page']) ? $_GET['page'] : 1;
 
       $row_start_index = ($offset - 1) * $per_page;
@@ -33,6 +31,7 @@ class Products {
                   inner join products
                   on product_images.pro_id = products.pro_id
                   GROUP BY products.pro_id
+                  ORDER BY products.created_at DESC
                   LIMIT :offset, :limit';
 
       $statement = $this->conn->prepare($query);
@@ -59,8 +58,6 @@ class Products {
 
   public function products_by_category() {
     $per_page = 20;
-    $offset;
-
     $category_id = $_GET['category_id'];
     $offset = isset($_GET['page']) ? $_GET['page'] : 1;
 
@@ -72,6 +69,7 @@ class Products {
               on product_images.pro_id = products.pro_id
               WHERE products.pro_cat = ' . $category_id .
               ' GROUP BY products.pro_id
+              ORDER BY products.created_at DESC
               Limit :offset, :limit';
 
     $statement = $this->conn->prepare($query);
@@ -114,11 +112,14 @@ class Products {
 
       $product_details = $statement->fetchAll(PDO::FETCH_ASSOC);
       $images = ['img_path' =>  $this->product_images($product_id)];
-      $user = ['first_name' => $product_details[0]['first_name'],
+      $user = ['id' => $product_details[0]['user_id'],
+                'first_name' => $product_details[0]['first_name'],
                 'last_name' => $product_details[0]['last_name'],
                 'email' => $product_details[0]['email'],
                 'phone_no' => $product_details[0]['phone_no']];
 
+
+      unset($product_details[0]['user_id']);
       unset($product_details[0]['first_name']);
       unset($product_details[0]['last_name']);
       unset($product_details[0]['email']);

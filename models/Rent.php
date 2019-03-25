@@ -296,4 +296,67 @@ class Rent {
         $statement->bindParam(':id', $pro_id);
         $statement->execute();
     }
+
+    public function rent_item() {
+        $item_id = $_GET['id'];
+        $buyer_id = $_GET['buyer_id'];
+
+        try {
+            $this->conn->beginTransaction();
+
+            $this->move_product_to_products_on_hold($item_id);
+
+            $this->move_images_to_images_on_hold($item_id);
+    
+            $this->insert_rent_request($item_id, $buyer_id);
+    
+            $this->remove_product($item_id);
+
+            $this->conn->commit();
+
+            return ['error' => False, 'message' => 'Rent Request Sent Successfully To Owner!'];
+        } catch (PDOException $exception) {
+            $this->conn->rollback();
+
+            return ['error' => True, 'message' => 'Failed To Send Rent Request To Owner'];
+        }
+    }
+
+    private function move_product_to_products_on_hold($item_id) {
+        $query = 'INSERT INTO products_on_hold
+                  SELECT * FROM products
+                  WHERE products.pro_id = :id';
+
+        $statement = $this->conn->prepare($query);
+        $statement->bindParam(':id', $item_id, PDO::PARAM_INT);
+        $statement->execute();
+    }
+
+    private function move_images_to_images_on_hold($item_id) {
+        $query = 'INSERT INTO product_images_on_hold
+                  SELECT * FROM product_images
+                  WHERE product_images.pro_id = :id';
+        
+        $statement = $this->conn->prepare($query);
+        $statement->bindParam(':id', $item_id, PDO::PARAM_INT);
+        $statement->execute();
+    }
+
+    private function insert_rent_request($item_id, $buyer_id) {
+        $query = 'INSERT INTO rent_requests (pro_id, buyer_id)
+                  VALUES (:pro_id, :buyer_id)';
+
+        $statement = $this->conn->prepare($query);
+        $statement->bindParam(':pro_id', $item_id, PDO::PARAM_INT);
+        $statement->bindParam(':buyer_id', $buyer_id, PDO::PARAM_INT);
+        $statement->execute();
+    }
+
+    private function remove_product($item_id) {
+        $query = 'DELETE FROM products WHERE pro_id = :id';
+
+        $statement = $this->conn->prepare($query);
+        $statement->bindParam(':id', $item_id, PDO::PARAM_INT);
+        $statement->execute();
+    }
 }
